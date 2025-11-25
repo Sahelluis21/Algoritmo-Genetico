@@ -1,84 +1,84 @@
 import random
 
 # -------------------------------
-# CONFIGURAÇÕES DO ALGORITMO
+# CONFIGURAÇÕES
 # -------------------------------
-TAMANHO_POP = 4        # agora a população tem 4 indivíduos
+TAM_POP = 4
 GERACOES = 20
-TAXA_MUTACAO = 0.1
+TAXA_MUT = 0.1
 
 # -------------------------------
-# POPULAÇÃO INICIAL (sua matriz)
+# POPULAÇÃO INICIAL
 # -------------------------------
-populacao = [
-    [1, 0, 1, 1],
-    [0, 1, 1, 0],
-    [1, 1, 0, 0],
-    [0, 0, 1, 1]
+pop = [
+    
+    (1, 0, 1, 0, 1, 1, 0, 1, 0, 0),
+    (0, 1, 1, 1, 0, 0, 1, 0, 1, 1),
+    (1, 1, 0, 0, 1, 0, 0, 1, 0, 1),
+    (0, 0, 1, 0, 1, 1, 1, 0, 0, 0),
+    (1, 0, 1, 1, 0, 0, 0, 1, 1, 0),
+    (0, 1, 0, 1, 1, 1, 0, 0, 1, 1),
+    (1, 0, 1, 0, 0, 1, 1, 1, 0, 0),
+    (0, 1, 0, 1, 0, 1, 1, 0, 1, 1),
+    (1, 1, 0, 0, 1, 0, 1, 1, 0, 0),
+    (0, 0, 1, 1, 0, 1, 0, 0, 1, 1)
+
 ]
 
 # -------------------------------
-# FUNÇÃO DE APTIDÃO (fitness)
+# FITNESS
 # -------------------------------
-def fitness(individuo):
-    """Exemplo: soma dos genes (quanto maior, melhor)."""
-    return sum(individuo)
+def fitness(ind):
+    return sum(ind)
 
 # -------------------------------
-# SELEÇÃO (roleta)
+# SELEÇÃO POR TORNEIO (mais rápido)
 # -------------------------------
-def selecionar_pais(pop):
-    soma = sum(fitness(ind) for ind in pop)
-    pick = random.uniform(0, soma)
-    atual = 0
-
-    for ind in pop:
-        atual += fitness(ind)
-        if atual >= pick:
-            return ind
+def torneio(pop):
+    a, b = random.sample(pop, 2)
+    return a if fitness(a) > fitness(b) else b
 
 # -------------------------------
-# CROSSOVER (1 ponto)
+# CROSSOVER 1 PONTO
 # -------------------------------
-def crossover(pai1, pai2):
-    ponto = random.randint(1, len(pai1)-1)
-    filho = pai1[:ponto] + pai2[ponto:]
-    return filho
+def crossover(p1, p2):
+    ponto = random.randint(1, len(p1) - 1)
+    return p1[:ponto] + p2[ponto:]
 
 # -------------------------------
 # MUTAÇÃO
 # -------------------------------
-def mutacao(individuo):
-    for i in range(len(individuo)):
-        if random.random() < TAXA_MUTACAO:
-            individuo[i] = 1 - individuo[i]  # alterna 0 ↔ 1
-    return individuo
+def mutacao(ind):
+    ind = list(ind)
+    for i in range(len(ind)):
+        if random.random() < TAXA_MUT:
+            ind[i] = 1 - ind[i]
+    return tuple(ind)
 
 # -------------------------------
-# EXECUÇÃO PRINCIPAL
+# LOOP PRINCIPAL
 # -------------------------------
-for geracao in range(GERACOES):
+for g in range(GERACOES):
 
-    # avalia população
-    avaliacoes = [fitness(ind) for ind in populacao]
+    # fitness calculado apenas 1x!
+    fit_values = [fitness(i) for i in pop]
 
-    # mostra melhor
-    melhor = populacao[avaliacoes.index(max(avaliacoes))]
-    print(f"Geração {geracao+1}: Melhor = {melhor}, fitness = {fitness(melhor)}")
+    melhor = pop[fit_values.index(max(fit_values))]
+    print(f"Geração {g+1}: melhor={melhor}, fit={fitness(melhor)}")
 
     nova = []
-    for _ in range(TAMANHO_POP):
-        pai1 = selecionar_pais(populacao)
-        pai2 = selecionar_pais(populacao)
-        filho = crossover(pai1, pai2)
+    for _ in range(TAM_POP):
+        p1 = torneio(pop)
+        p2 = torneio(pop)
+        filho = crossover(p1, p2)
         filho = mutacao(filho)
         nova.append(filho)
 
-    populacao = nova
+    pop = nova
 
 # -------------------------------
 # RESULTADO FINAL
 # -------------------------------
-melhor_final = max(populacao, key=fitness)
+melhor_final = max(pop, key=fitness)
 print("\nMelhor indivíduo final:", melhor_final)
 print("Fitness final:", fitness(melhor_final))
